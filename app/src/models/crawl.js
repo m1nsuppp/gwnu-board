@@ -1,7 +1,5 @@
 "use strict";
 
-const URL = 'https://ee.gwnu.ac.kr/ee2/31950/subview.do'; 
-
 const getHTML = async (URL) => {
   const axios = require('axios'); 
   
@@ -38,7 +36,7 @@ const parsing = async (URL) => {
 
 const insIntoDB = async (URL) => {
   const mySQL = require('mysql2');
-  const dbConfig = require('./../db/db_config.json');
+  const dbConfig = require('./../db/db-config.json');
   const db = mySQL.createConnection(dbConfig);
   const notices = await parsing(URL);
   const sql = `insert into notices (dept, title, link) values ?;`;
@@ -49,4 +47,4 @@ const insIntoDB = async (URL) => {
   });
 };
 
-insIntoDB(URL);
+module.exports = insIntoDB;
