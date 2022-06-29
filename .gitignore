@@ -105,4 +105,4 @@ dist
 .tern-port
 
 #
-**db-config.json
+**./src/db/db-config.json
