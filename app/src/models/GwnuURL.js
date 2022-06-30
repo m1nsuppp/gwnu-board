@@ -1,5 +1,5 @@
 class GwnuURL {
-  constructor () {
+  constructor() {
     this.humanitiesURLs = {
       gukmun: "https://gukmun.gwnu.ac.kr/gukmun/27599/subview.do",
       english: "https://english.gwnu.ac.kr/english/29693/subview.do",
