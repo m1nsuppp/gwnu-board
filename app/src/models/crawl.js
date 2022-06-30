@@ -14,22 +14,26 @@ const parsing = async (URL) => {
   const cheerio = require('cheerio'); 
   const html = await getHTML(URL);
   const $ = cheerio.load(html.data);
-  const $articleList = $('._artclTdTitle');
+  const $tr = $('tr');
   const maxTitleLength = 70;
   const notices = [];
 
-  $articleList.each((idx, node) => {
-    let articleTdTitle = $(node).find('a').text().trim();
-    let articleTdLink = $(node).find('a').attr('href');
-    
-    if (articleTdTitle.length < maxTitleLength) {
+  $tr.each((i, el) => {
+    let artclTdTitle = $(el).find('._artclTdTitle').text().replace('새글', '').trim();
+    let artclTdLink = $(el).find('a').attr('href');
+    let artclTdRdate = $(el).find('._artclTdRdate').text().trim();
+
+    if (artclTdTitle.length < maxTitleLength) {
       notices.push([
         '전자공학과',
-        articleTdTitle,
-        `https://ee.gwnu.ac.kr${articleTdLink}`,
-      ]); 
+        artclTdTitle,
+        `https://ee.gwnu.ac.kr${artclTdLink}`,
+        artclTdRdate,
+      ]);
     }
   });
+  
+  notices.shift();
 
   return notices;
 };
@@ -39,7 +43,7 @@ const insIntoDB = async (URL) => {
   const dbConfig = require('./../db/db-config.json');
   const db = mySQL.createConnection(dbConfig);
   const notices = await parsing(URL);
-  const sql = `insert into notices (dept, title, link) values ?;`;
+  const sql = `insert into notices (dept, title, link, date) values ?;`;
 
   db.query(sql, [notices], (error, result) => {
     if (error) throw error;
@@ -47,4 +51,8 @@ const insIntoDB = async (URL) => {
   });
 };
 
-module.exports = insIntoDB;
+module.exports = {
+  getHTML,
+  parsing,
+  insIntoDB,
+};
