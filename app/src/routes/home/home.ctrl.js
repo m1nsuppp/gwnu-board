@@ -15,6 +15,7 @@ const index = (req, res) => {
         dept: data.dept,
         title: data.title,
         link: data.link,
+        date: data.date,
       });
     }
     res.render('home/index', { notices: notices });    
