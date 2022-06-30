@@ -1,33 +1,40 @@
 "use strict";
 
-const getHTML = async (URL) => {
+const getHTML = async (_URL) => {
   const axios = require('axios'); 
   
   try {
-    return await axios.get(URL);
+    return await axios.get(_URL);
   } catch(error) {
     console.log(error);
   };
 };
 
-const parsing = async (URL) => {
+const parsing = async (_URL) => {
   const cheerio = require('cheerio'); 
-  const html = await getHTML(URL);
+  const html = await getHTML(_URL);
   const $ = cheerio.load(html.data);
   const $tr = $('tr');
+  const deptURL = _URL.replace(/[0-9]/g, '').replace('/subview.do', 'index.do');
+  const deptHTML = await getHTML(deptURL);
+  const $dept = cheerio.load(deptHTML.data);
   const maxTitleLength = 70;
   const notices = [];
+  let domain = new URL(_URL).origin;
 
   $tr.each((i, el) => {
+    let dept = $dept('head > title').text();
     let artclTdTitle = $(el).find('._artclTdTitle').text().replace('새글', '').trim();
-    let artclTdLink = $(el).find('a').attr('href');
+    let artclTdLink = domain + $(el).find('a').attr('href');
     let artclTdRdate = $(el).find('._artclTdRdate').text().trim();
+
+    // `https://${URL}.gwnu.ac.kr${artclTdLink}`;
 
     if (artclTdTitle.length < maxTitleLength) {
       notices.push([
-        '전자공학과',
+        dept,
         artclTdTitle,
-        `https://ee.gwnu.ac.kr${artclTdLink}`,
+        artclTdLink,
         artclTdRdate,
       ]);
     }
@@ -38,21 +45,9 @@ const parsing = async (URL) => {
   return notices;
 };
 
-const insIntoDB = async (URL) => {
-  const mySQL = require('mysql2');
-  const dbConfig = require('./../db/db-config.json');
-  const db = mySQL.createConnection(dbConfig);
-  const notices = await parsing(URL);
-  const sql = `insert into notices (dept, title, link, date) values ?;`;
 
-  db.query(sql, [notices], (error, result) => {
-    if (error) throw error;
-    db.end();
-  });
-};
 
 module.exports = {
   getHTML,
   parsing,
-  insIntoDB,
 };
