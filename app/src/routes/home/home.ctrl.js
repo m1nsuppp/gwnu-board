@@ -3,7 +3,7 @@
 const boards = require("../../db/db");
 
 const index = (req, res) => {
-  const sql = `select * from notices`;
+  const sql = `select * from notices order by date desc`;
 
   boards.query(sql, (err, result) => {
     if (err) throw err;
